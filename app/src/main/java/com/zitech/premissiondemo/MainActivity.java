@@ -1,26 +1,35 @@
 package com.zitech.premissiondemo;
 
 import android.Manifest;
+import android.content.ContentResolver;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.widget.TextView;
 import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
     public static final int MY_PERMISSIONS_REQUEST_CALL_PHONE = 0;
     public static final int MY_PERMISSIONS_REQUEST_READ_CONTACTS = 1;
+    public static final int MY_PERMISSIONS_REQUEST_CAMERA = 2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        TextView textView=(TextView)findViewById(R.id.tv);
+        textView.setText("MainActivity");
         final String permission_call_phone = Manifest.permission.CALL_PHONE;
         final String permission_read_contacts = Manifest.permission.READ_CONTACTS;
         final String permission_camear = Manifest.permission.CAMERA;
@@ -33,16 +42,36 @@ public class MainActivity extends AppCompatActivity {
             int checkCamearPermission = ContextCompat.checkSelfPermission(getApplicationContext(), permission_camear);
             //如果其中有未授权的
             if (checkCallPhonePermission != PackageManager.PERMISSION_GRANTED||checkReadContactsPermission!= PackageManager.PERMISSION_GRANTED||checkCamearPermission!= PackageManager.PERMISSION_GRANTED) {
-                Log.d("pepe", "Main"+"弹出授权申请对话框");
                 // Should we show an explanation?
-                if (ActivityCompat.shouldShowRequestPermissionRationale(MainActivity.this,
-                        Manifest.permission.CALL_PHONE)) {
-                    //TODO:需要弹出解释对话框
-                    Toast.makeText(MainActivity.this, "需要弹出解释对话框", Toast.LENGTH_SHORT).show();
-                    // Show an expanation to the user *asynchronously* -- don't block
-                    // this thread waiting for the user's response! After the user
-                    // sees the explanation, try again to request the permission.
-                } else {
+                if (ActivityCompat.shouldShowRequestPermissionRationale(MainActivity.this, permission_call_phone)) {
+                    Log.d("pepe", "Main"+"需要弹出解释对话框,为什么一定需要这个权限");
+                    //TODO:需要弹出解释对话框,为什么一定需要这个权限
+                    showMessageOKCancel("You need to allow access to Contacts",
+                            new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    ActivityCompat.requestPermissions(MainActivity.this, new String[]{permission_call_phone}, MY_PERMISSIONS_REQUEST_CALL_PHONE);
+                                }
+                            });
+                } else if(ActivityCompat.shouldShowRequestPermissionRationale(MainActivity.this, permission_read_contacts)){
+                    showMessageOKCancel("You need to allow access to Contacts",
+                            new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    ActivityCompat.requestPermissions(MainActivity.this, new String[]{permission_read_contacts}, MY_PERMISSIONS_REQUEST_READ_CONTACTS);
+                                }
+                            });
+                } else if(ActivityCompat.shouldShowRequestPermissionRationale(MainActivity.this, permission_camear)) {
+                    showMessageOKCancel("You need to allow access to Contacts",
+                            new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    ActivityCompat.requestPermissions(MainActivity.this, new String[]{permission_camear}, MY_PERMISSIONS_REQUEST_CAMERA);
+                                }
+                            });
+                }else{
+                    Log.d("pepe", "Main"+"无需解释，直接申请授权");
+                    //TODO:无需解释，直接申请授权
                     // No explanation needed, we can request the permission.
                     ActivityCompat.requestPermissions(MainActivity.this, new String[]{permission_call_phone,permission_read_contacts,permission_camear}, MY_PERMISSIONS_REQUEST_CALL_PHONE);
                     // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
@@ -63,6 +92,15 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    private void showMessageOKCancel(String message, DialogInterface.OnClickListener okListener) {
+        new AlertDialog.Builder(MainActivity.this)
+                .setMessage(message)
+                .setPositiveButton("OK", okListener)
+                .setNegativeButton("Cancel", null)
+                .create()
+                .show();
+    }
+
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -71,26 +109,32 @@ public class MainActivity extends AppCompatActivity {
                 // If request is cancelled, the result arrays are empty.
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     Log.d("pepe","Main"+ "授权成功，做你想做的吧！");
-//                    callPhone();
                     //TODO:授权成功
-
-                    // permission was granted, yay! Do the
-                    // contacts-related task you need to do.
+                    callPhone();
 
                 } else {
                     Log.d("pepe", "Main"+"用户拒绝授权！");
                     //TODO:用户拒绝
                     startActivity(new Intent(MainActivity.this,BActivity.class));
-                    // Permission Denied
-                    Toast.makeText(MainActivity.this, "Permission Denied", Toast.LENGTH_SHORT).show();
-                    // permission denied, boo! Disable the
-                    // functionality that depends on this permission.
+                    Toast.makeText(MainActivity.this,"你已拒绝授予该权限，如需更改请于设置中设置！",Toast.LENGTH_LONG).show();
                 }
                 return;
             }
         }
     }
 
+    private void readContact() {
+        ContentResolver cr = getContentResolver();
+        String str[] = {ContactsContract.CommonDataKinds.Phone.CONTACT_ID, ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME, ContactsContract.CommonDataKinds.Phone.NUMBER,
+                ContactsContract.CommonDataKinds.Phone.PHOTO_ID};
+        Cursor cur = cr.query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, str, null,
+                null, null);
+        int count = cur.getCount();
+        cur.close();
+
+        Toast.makeText(MainActivity.this, String.format("发现%s条", count), Toast.LENGTH_SHORT)
+                .show();
+    }
     public void callPhone() {
         Intent intent = new Intent(Intent.ACTION_CALL);
         Uri data = Uri.parse("tel:" + "10086");
