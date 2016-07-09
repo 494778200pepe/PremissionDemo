@@ -30,8 +30,9 @@ public class MainActivity extends AppCompatActivity {
             //检查是否拥有权限
             int checkCallPhonePermission = ContextCompat.checkSelfPermission(getApplicationContext(), permission_call_phone);
             int checkReadContactsPermission = ContextCompat.checkSelfPermission(getApplicationContext(), permission_read_contacts);
-//            if (checkCallPhonePermission != PackageManager.PERMISSION_GRANTED||checkReadContactsPermission!= PackageManager.PERMISSION_GRANTED) {
-            if (checkCallPhonePermission != PackageManager.PERMISSION_GRANTED) {
+            int checkCamearPermission = ContextCompat.checkSelfPermission(getApplicationContext(), permission_camear);
+            //如果其中有未授权的
+            if (checkCallPhonePermission != PackageManager.PERMISSION_GRANTED||checkReadContactsPermission!= PackageManager.PERMISSION_GRANTED||checkCamearPermission!= PackageManager.PERMISSION_GRANTED) {
                 Log.d("pepe", "Main"+"弹出授权申请对话框");
                 // Should we show an explanation?
                 if (ActivityCompat.shouldShowRequestPermissionRationale(MainActivity.this,
