@@ -45,12 +45,12 @@ public class MainActivity extends AppCompatActivity {
                 // Should we show an explanation?
                 if (ActivityCompat.shouldShowRequestPermissionRationale(MainActivity.this, permission_call_phone)) {
                     Log.d("pepe", "Main"+"需要弹出解释对话框,为什么一定需要这个权限");
-                    //TODO:需要弹出解释对话框,为什么一定需要这个权限
+                    //TODO:之前申请被拒绝，需要弹出解释对话框,为什么一定需要这个权限
                     showMessageOKCancel("You need to allow access to Contacts",
                             new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
-                                    ActivityCompat.requestPermissions(MainActivity.this, new String[]{permission_call_phone}, MY_PERMISSIONS_REQUEST_CALL_PHONE);
+                                    ActivityCompat.requestPermissions(MainActivity.this, new String[]{permission_call_phone}, 1);
                                 }
                             });
                 } else if(ActivityCompat.shouldShowRequestPermissionRationale(MainActivity.this, permission_read_contacts)){
@@ -58,7 +58,7 @@ public class MainActivity extends AppCompatActivity {
                             new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
-                                    ActivityCompat.requestPermissions(MainActivity.this, new String[]{permission_read_contacts}, MY_PERMISSIONS_REQUEST_READ_CONTACTS);
+                                    ActivityCompat.requestPermissions(MainActivity.this, new String[]{permission_read_contacts}, 2);
                                 }
                             });
                 } else if(ActivityCompat.shouldShowRequestPermissionRationale(MainActivity.this, permission_camear)) {
@@ -66,14 +66,14 @@ public class MainActivity extends AppCompatActivity {
                             new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
-                                    ActivityCompat.requestPermissions(MainActivity.this, new String[]{permission_camear}, MY_PERMISSIONS_REQUEST_CAMERA);
+                                    ActivityCompat.requestPermissions(MainActivity.this, new String[]{permission_camear}, 3);
                                 }
                             });
                 }else{
                     Log.d("pepe", "Main"+"无需解释，直接申请授权");
-                    //TODO:无需解释，直接申请授权
+                    //TODO:之前没有申请过，无需解释，直接申请授权
                     // No explanation needed, we can request the permission.
-                    ActivityCompat.requestPermissions(MainActivity.this, new String[]{permission_call_phone,permission_read_contacts,permission_camear}, MY_PERMISSIONS_REQUEST_CALL_PHONE);
+                    ActivityCompat.requestPermissions(MainActivity.this, new String[]{permission_call_phone,permission_read_contacts,permission_camear}, 0);
                     // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
                     // app-defined int constant. The callback method gets the
                     // result of the request.
@@ -105,16 +105,16 @@ public class MainActivity extends AppCompatActivity {
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         switch (requestCode) {
-            case MY_PERMISSIONS_REQUEST_CALL_PHONE: {
+            case 0: {
                 // If request is cancelled, the result arrays are empty.
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     Log.d("pepe","Main"+ "授权成功，做你想做的吧！");
-                    //TODO:授权成功
+                    //TODO:授权成功，做你想做的吧！
                     callPhone();
 
                 } else {
                     Log.d("pepe", "Main"+"用户拒绝授权！");
-                    //TODO:用户拒绝
+                    //TODO:用户拒绝授权！
                     startActivity(new Intent(MainActivity.this,BActivity.class));
                     Toast.makeText(MainActivity.this,"你已拒绝授予该权限，如需更改请于设置中设置！",Toast.LENGTH_LONG).show();
                 }
